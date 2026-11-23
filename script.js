@@ -12,24 +12,111 @@ const mk = (w, h) => {
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const toBlob = (cv, type, q) => new Promise(res => cv.toBlob(res, type, q));
 
+// ---------- Icons (inline SVG, no downloads) ----------
+const ICONS = {
+  logo: "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m14.31 8 5.74 9.94\"/><path d=\"M9.69 8h11.48\"/><path d=\"m7.38 12 5.74-9.94\"/><path d=\"M9.69 16 3.95 6.06\"/><path d=\"M14.31 16H2.83\"/><path d=\"m16.62 12-5.74 9.94\"/>",
+  undo: "<path d=\"M9 14 4 9l5-5\"/><path d=\"M4 9h10.5a5.5 5.5 0 0 1 0 11H11\"/>",
+  redo: "<path d=\"m15 14 5-5-5-5\"/><path d=\"M20 9H9.5a5.5 5.5 0 0 0 0 11H13\"/>",
+  upload: "<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><path d=\"m17 8-5-5-5 5\"/><path d=\"M12 3v12\"/>",
+  reset: "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\"/><path d=\"M3 3v5h5\"/><path d=\"M12 7v5l4 2\"/>",
+  download: "<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><path d=\"m7 10 5 5 5-5\"/><path d=\"M12 15V3\"/>",
+  eye: "<path d=\"M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>",
+  image: "<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><circle cx=\"9\" cy=\"9\" r=\"2\"/><path d=\"m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21\"/>",
+  adjust: "<path d=\"M21 4h-7\"/><path d=\"M10 4H3\"/><path d=\"M21 12h-9\"/><path d=\"M8 12H3\"/><path d=\"M21 20h-5\"/><path d=\"M12 20H3\"/><path d=\"M14 2v4\"/><path d=\"M8 10v4\"/><path d=\"M16 18v4\"/>",
+  crop: "<path d=\"M6 2v14a2 2 0 0 0 2 2h14\"/><path d=\"M18 22V8a2 2 0 0 0-2-2H2\"/>",
+  palette: "<circle cx=\"13.5\" cy=\"6.5\" r=\".5\"/><circle cx=\"17.5\" cy=\"10.5\" r=\".5\"/><circle cx=\"8.5\" cy=\"7.5\" r=\".5\"/><circle cx=\"6.5\" cy=\"12.5\" r=\".5\"/><path d=\"M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z\"/>",
+  sun: "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2\"/><path d=\"M12 20v2\"/><path d=\"m4.93 4.93 1.41 1.41\"/><path d=\"m17.66 17.66 1.41 1.41\"/><path d=\"M2 12h2\"/><path d=\"M20 12h2\"/><path d=\"m6.34 17.66-1.41 1.41\"/><path d=\"m19.07 4.93-1.41 1.41\"/>",
+  sundim: "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 4h.01\"/><path d=\"M20 12h.01\"/><path d=\"M12 20h.01\"/><path d=\"M4 12h.01\"/><path d=\"M17.657 6.343h.01\"/><path d=\"M17.657 17.657h.01\"/><path d=\"M6.343 17.657h.01\"/><path d=\"M6.343 6.343h.01\"/>",
+  contrast: "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 18a6 6 0 0 0 0-12v12z\"/>",
+  drop: "<path d=\"M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z\"/>",
+  hue: "<circle cx=\"9\" cy=\"9\" r=\"7\"/><circle cx=\"15\" cy=\"15\" r=\"7\"/>",
+  thermo: "<path d=\"M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z\"/>",
+  pipette: "<path d=\"m2 22 1-1h3l9-9\"/><path d=\"M3 21v-3l9-9\"/><path d=\"m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z\"/>",
+  triangle: "<path d=\"M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z\"/>",
+  waves: "<path d=\"M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1\"/><path d=\"M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1\"/><path d=\"M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1\"/>",
+  vignette: "<circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"12\" cy=\"12\" r=\"4\"/>",
+  feather: "<path d=\"M12.67 19a2 2 0 0 0 1.416-.588l6.154-6.172a6 6 0 0 0-8.49-8.49L5.586 9.914A2 2 0 0 0 5 11.328V18a1 1 0 0 0 1 1z\"/><path d=\"M16 8 2 22\"/><path d=\"M17.5 15H9\"/>",
+  scan: "<path d=\"M3 7V5a2 2 0 0 1 2-2h2\"/><path d=\"M17 3h2a2 2 0 0 1 2 2v2\"/><path d=\"M21 17v2a2 2 0 0 1-2 2h-2\"/><path d=\"M7 21H5a2 2 0 0 1-2-2v-2\"/>",
+  rotl: "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\"/><path d=\"M3 3v5h5\"/>",
+  rotr: "<path d=\"M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8\"/><path d=\"M21 3v5h-5\"/>",
+  fliph: "<path d=\"m3 7 5 5-5 5V7\"/><path d=\"m21 7-5 5 5 5V7\"/><path d=\"M12 20v2\"/><path d=\"M12 14v2\"/><path d=\"M12 8v2\"/><path d=\"M12 2v2\"/>",
+  flipv: "<path d=\"m17 3-5 5-5-5h10\"/><path d=\"m17 21-5-5-5 5h10\"/><path d=\"M4 12H2\"/><path d=\"M10 12H8\"/><path d=\"M16 12h-2\"/><path d=\"M22 12h-2\"/>",
+  ruler: "<path d=\"M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z\"/><path d=\"m14.5 12.5 2-2\"/><path d=\"m11.5 9.5 2-2\"/><path d=\"m8.5 6.5 2-2\"/><path d=\"m17.5 15.5 2-2\"/>",
+  arOrig: "<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" stroke-dasharray=\"3 3\"/>",
+  ar11: "<rect x=\"5\" y=\"5\" width=\"14\" height=\"14\" rx=\"1.5\"/>",
+  ar43: "<rect x=\"3\" y=\"6\" width=\"18\" height=\"12\" rx=\"1.5\"/>",
+  ar32: "<rect x=\"3\" y=\"6.5\" width=\"18\" height=\"11\" rx=\"1.5\"/>",
+  ar169: "<rect x=\"2\" y=\"7\" width=\"20\" height=\"11.25\" rx=\"1.5\"/>",
+  ar45: "<rect x=\"5\" y=\"3\" width=\"14\" height=\"17.5\" rx=\"1.5\"/>",
+  sparkles: "<path d=\"M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z\"/><path d=\"M20 3v4\"/><path d=\"M22 5h-4\"/><path d=\"M4 17v2\"/><path d=\"M5 18H3\"/>",
+  circleFocus: "<circle cx=\"12\" cy=\"12\" r=\"9\" stroke-dasharray=\"3 3\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>",
+  bandFocus: "<path d=\"M3 5h18\"/><path d=\"M3 19h18\"/><rect x=\"3\" y=\"9\" width=\"18\" height=\"6\" rx=\"1\"/>",
+  eraser: "<path d=\"m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21\"/><path d=\"M22 21H7\"/><path d=\"m5 11 9 9\"/>",
+  brush: "<path d=\"m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08\"/><path d=\"M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z\"/>",
+  blurMore: "<circle cx=\"12\" cy=\"12\" r=\"3\"/><circle cx=\"12\" cy=\"12\" r=\"7\" stroke-dasharray=\"2 3\"/><circle cx=\"12\" cy=\"12\" r=\"10\" stroke-dasharray=\"1 3\"/>",
+  move: "<path d=\"M12 2v20\"/><path d=\"m15 19-3 3-3-3\"/><path d=\"m19 9 3 3-3 3\"/><path d=\"M2 12h20\"/><path d=\"m5 9-3 3 3 3\"/><path d=\"m9 5 3-3 3 3\"/>",
+  swap: "<path d=\"M8 3 4 7l4 4\"/><path d=\"M4 7h16\"/><path d=\"m16 21 4-4-4-4\"/><path d=\"M20 17H4\"/>",
+  brushSize: "<circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"12\" cy=\"12\" r=\"1\"/>",
+  user: "<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/>",
+  file: "<path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/>",
+  gauge: "<path d=\"m12 14 4-4\"/><path d=\"M3.34 19a10 10 0 1 1 17.32 0\"/>",
+  archive: "<rect width=\"20\" height=\"5\" x=\"2\" y=\"3\" rx=\"1\"/><path d=\"M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8\"/><path d=\"M10 12h4\"/>",
+  target: "<circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"12\" cy=\"12\" r=\"6\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/>",
+  flag: "<path d=\"M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z\"/><line x1=\"4\" x2=\"4\" y1=\"22\" y2=\"15\"/>",
+  maximize2: "<path d=\"M15 3h6v6\"/><path d=\"M9 21H3v-6\"/><path d=\"m21 3-7 7\"/><path d=\"m3 21 7-7\"/>",
+  moon: "<path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z\"/>",
+};
+const svg = name => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
+function mountIcons(root = document) {
+  root.querySelectorAll('i[data-icon]').forEach(el => { if (!el.firstChild) el.innerHTML = svg(el.dataset.icon); });
+}
+mountIcons();
+
+// Filled slider track: bipolar sliders (min < 0) fill from the centre
+function paintRange(el) {
+  const min = +el.min, max = +el.max, v = +el.value;
+  const pct = x => (x - min) / (max - min) * 100;
+  const p = pct(v), z = min < 0 ? pct(0) : 0;
+  el.style.setProperty('--a', Math.min(p, z) + '%');
+  el.style.setProperty('--b', Math.max(p, z) + '%');
+}
+document.addEventListener('input', e => { if (e.target.type === 'range') paintRange(e.target); });
+
+// ---------- Theme ----------
+const themeBtn = $('themeBtn');
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  themeBtn.innerHTML = `<i data-icon="${t === 'dark' ? 'sun' : 'moon'}"></i>`;
+  mountIcons(themeBtn);
+  themeBtn.title = t === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+  try { localStorage.setItem('photo-editor-theme', t); } catch (e) { /* storage unavailable */ }
+}
+{
+  let saved = null;
+  try { saved = localStorage.getItem('photo-editor-theme'); } catch (e) { /* ignore */ }
+  const light = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+  applyTheme(saved || (light ? 'light' : 'dark'));
+}
+themeBtn.onclick = () => applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+
 // ---------- Slider definitions ----------
-// [key, label, min, max, panel, default]
+// [key, label, min, max, group, default, icon]
 const sliders = [
-  ['exposure',   'Exposure',      -100, 100, 'adjust', 0],
-  ['brightness', 'Brightness',    -100, 100, 'adjust', 0],
-  ['contrast',   'Contrast',      -100, 100, 'adjust', 0],
-  ['saturation', 'Saturation',    -100, 100, 'adjust', 0],
-  ['hue',        'Hue',           -180, 180, 'adjust', 0],
-  ['warmth',     'Warmth',        -100, 100, 'adjust', 0],
-  ['tint',       'Tint',          -100, 100, 'adjust', 0],
-  ['sharpen',    'Sharpen',          0, 100, 'adjust', 0],
-  ['blur',       'Blur',             0,  20, 'adjust', 0],
-  ['vignette',   'Vignette',         0, 100, 'adjust', 0],
-  ['bgBlur',     'Background blur',  0, 100, 'bg',     0],
-  ['edge',       'Edge softness',    0,  30, 'bg',     8],
-  ['focusSize',  'Focus size (circle / band)', 10, 100, 'bg', 50],
+  ['exposure',   'Exposure',      -100, 100, 'light',   0, 'sun'],
+  ['brightness', 'Brightness',    -100, 100, 'light',   0, 'sundim'],
+  ['contrast',   'Contrast',      -100, 100, 'light',   0, 'contrast'],
+  ['saturation', 'Saturation',    -100, 100, 'color',   0, 'drop'],
+  ['hue',        'Hue',           -180, 180, 'color',   0, 'hue'],
+  ['warmth',     'Warmth',        -100, 100, 'color',   0, 'thermo'],
+  ['tint',       'Tint',          -100, 100, 'color',   0, 'pipette'],
+  ['sharpen',    'Sharpen',          0, 100, 'effects', 0, 'triangle'],
+  ['blur',       'Blur',             0,  20, 'effects', 0, 'waves'],
+  ['vignette',   'Vignette',         0, 100, 'effects', 0, 'vignette'],
+  ['bgBlur',     'Background blur',  0, 100, 'bg',      0, 'logo'],
+  ['edge',       'Edge softness',    0,  30, 'bg',      8, 'feather'],
+  ['focusSize',  'Focus size',      10, 100, 'bg',     50, 'scan'],
 ];
-const sliderHost = { adjust: 'tab-adjust', bg: 'bgSliders' };
+const sliderHost = { light: 'adj-light', color: 'adj-color', effects: 'adj-effects', bg: 'bgSliders' };
 
 // ---------- State ----------
 const defaults = () => ({
@@ -54,12 +141,13 @@ const view = $('view');
 const stage = $('stage');
 
 // ---------- Build sliders ----------
-sliders.forEach(([key, label, min, max, panel, def]) => {
+sliders.forEach(([key, label, min, max, panel, def, ic]) => {
   const row = document.createElement('div');
   row.className = 'row';
-  row.innerHTML = `<label for="s-${key}">${label} <output id="o-${key}">${def}</output></label>
+  row.innerHTML = `<label for="s-${key}"><span class="lbl"><i data-icon="${ic}"></i>${label}</span> <output id="o-${key}">${def}</output></label>
     <input type="range" id="s-${key}" min="${min}" max="${max}" step="1" value="${def}" title="Double-click to reset">`;
   $(sliderHost[panel]).appendChild(row);
+  mountIcons(row);
   const input = row.querySelector('input');
   input.addEventListener('input', () => {
     s[key] = +input.value;
@@ -70,8 +158,8 @@ sliders.forEach(([key, label, min, max, panel, def]) => {
   input.addEventListener('change', commit);
   input.addEventListener('dblclick', () => {
     input.value = def;
-    input.dispatchEvent(new Event('input'));
-    input.dispatchEvent(new Event('change'));
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
   });
 });
 
@@ -466,6 +554,7 @@ function syncUI() {
   $('flipH').classList.toggle('active', s.flipH);
   $('flipV').classList.toggle('active', s.flipV);
   looksBox.querySelectorAll('.look').forEach(x => x.classList.toggle('active', x.dataset.look === s.look));
+  document.querySelectorAll('input[type=range]').forEach(paintRange);
 }
 function updateToolUI() {
   [['sharp', 'toolSharp'], ['blur', 'toolBlur'], ['move', 'toolMove']].forEach(([k, id]) =>
@@ -488,8 +577,7 @@ function loadFile(file) {
     hist.length = 0; hi = -1;
     $('drop').style.display = 'none';
     view.style.display = 'block';
-    $('compare').style.display = 'block';
-    $('info').style.display = 'block';
+    $('floatbar').style.display = 'flex';
     $('resetBtn').disabled = false;
     $('downloadBtn').disabled = false;
     $('exportStatus').textContent = '';
@@ -543,8 +631,8 @@ $('straighten').oninput = e => {
 $('straighten').onchange = commit;
 $('straighten').ondblclick = e => {
   e.target.value = 0;
-  e.target.dispatchEvent(new Event('input'));
-  e.target.dispatchEvent(new Event('change'));
+  e.target.dispatchEvent(new Event('input', { bubbles: true }));
+  e.target.dispatchEvent(new Event('change', { bubbles: true }));
 };
 document.querySelectorAll('#aspects button').forEach(b => b.addEventListener('click', () => {
   s.aspect = +b.dataset.aspect;
@@ -754,6 +842,7 @@ document.querySelectorAll('#kbPresets button').forEach(b => b.addEventListener('
   syncExportUI();
 }));
 syncExportUI();
+document.querySelectorAll('input[type=range]').forEach(paintRange);
 
 // Disable formats this browser cannot create (WebP / AVIF encoding depends on the browser)
 (async function detectSupport() {
