@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,179 +9,216 @@
 <body>
 
 <header>
-  <h1>Photo Editor</h1>
-  <button id="undoBtn" disabled title="Undo (Ctrl+Z)">Undo</button>
-  <button id="redoBtn" disabled title="Redo (Ctrl+Shift+Z)">Redo</button>
-  <button id="openBtn">Open image</button>
-  <button id="resetBtn" disabled>Reset all</button>
-  <input type="file" id="file" accept="image/*" hidden>
+  <div class="brand">
+    <span class="logo"><i data-icon="logo"></i></span>
+    <h1>Photo Editor</h1>
+  </div>
+  <div class="actions">
+    <div class="seg">
+      <button id="undoBtn" disabled title="Undo (Ctrl+Z)"><i data-icon="undo"></i><span class="t">Undo</span></button>
+      <button id="redoBtn" disabled title="Redo (Ctrl+Shift+Z)"><i data-icon="redo"></i><span class="t">Redo</span></button>
+    </div>
+    <button id="openBtn" title="Open image (Ctrl+O)"><i data-icon="upload"></i><span class="t">Open image</span></button>
+    <button id="resetBtn" disabled title="Reset all edits"><i data-icon="reset"></i><span class="t">Reset all</span></button>
+    <button id="themeBtn" class="icon-only" title="Switch light / dark theme" aria-label="Switch light or dark theme"><i data-icon="moon"></i></button>
+    <input type="file" id="file" accept="image/*" hidden>
+  </div>
 </header>
 
 <main>
   <section id="stage" aria-label="Preview">
     <div id="drop">
+      <div class="drop-icon"><i data-icon="image"></i></div>
       <strong>Drop a photo here</strong>
-      or use Open image. Your photo stays in your browser.
-      <br><button id="openBtn2" class="primary">Open image</button>
+      <span>or use Open image. Your photo stays in your browser.</span>
+      <button id="openBtn2" class="primary"><i data-icon="upload"></i>Open image</button>
+      <small>Tip: you can also paste an image with Ctrl+V</small>
     </div>
     <canvas id="view"></canvas>
     <div id="brushCursor"></div>
-    <button id="compare" title="Hold to see the original (or hold the \ key)">Hold to compare</button>
-    <div id="info"></div>
+    <div id="floatbar">
+      <button id="compare" title="Hold to see the original (or hold the \ key)"><i data-icon="eye"></i>Hold to compare</button>
+      <div id="info"></div>
+    </div>
   </section>
 
   <aside>
     <nav role="tablist" aria-label="Editing tools">
-      <button role="tab" aria-selected="true" data-tab="adjust">Adjust</button>
-      <button role="tab" aria-selected="false" data-tab="orient">Orient</button>
-      <button role="tab" aria-selected="false" data-tab="looks">Looks</button>
-      <button role="tab" aria-selected="false" data-tab="bg">BG blur</button>
-      <button role="tab" aria-selected="false" data-tab="export">Export</button>
+      <button role="tab" aria-selected="true"  data-tab="adjust"><i data-icon="adjust"></i><span>Adjust</span></button>
+      <button role="tab" aria-selected="false" data-tab="orient"><i data-icon="crop"></i><span>Orient</span></button>
+      <button role="tab" aria-selected="false" data-tab="looks"><i data-icon="palette"></i><span>Looks</span></button>
+      <button role="tab" aria-selected="false" data-tab="bg"><i data-icon="logo"></i><span>BG blur</span></button>
+      <button role="tab" aria-selected="false" data-tab="export"><i data-icon="download"></i><span>Export</span></button>
     </nav>
 
-    <!-- Adjust sliders are created by script.js -->
-    <div class="panel show" id="tab-adjust"></div>
+    <!-- Slider rows are created by script.js -->
+    <div class="panel show" id="tab-adjust">
+      <section class="card"><h2><i data-icon="sun"></i>Light</h2><div id="adj-light"></div></section>
+      <section class="card"><h2><i data-icon="palette"></i>Colour</h2><div id="adj-color"></div></section>
+      <section class="card"><h2><i data-icon="sparkles"></i>Effects</h2><div id="adj-effects"></div></section>
+    </div>
 
     <div class="panel" id="tab-orient">
-      <h2>Rotate and flip</h2>
-      <div class="group">
-        <button id="rotL">Rotate left</button>
-        <button id="rotR">Rotate right</button>
-        <button id="flipH">Flip horizontal</button>
-        <button id="flipV">Flip vertical</button>
-      </div>
-      <div class="row">
-        <label for="straighten">Straighten <output id="straightenOut">0°</output></label>
-        <input type="range" id="straighten" min="-15" max="15" step="0.1" value="0">
-      </div>
-      <h2>Crop</h2>
-      <div class="group" id="aspects">
-        <button data-aspect="0" class="active">Original</button>
-        <button data-aspect="1">1:1</button>
-        <button data-aspect="1.3333">4:3</button>
-        <button data-aspect="1.5">3:2</button>
-        <button data-aspect="1.7778">16:9</button>
-        <button data-aspect="0.8">4:5</button>
-      </div>
-      <p class="hint">Crops are centered. Straighten zooms in slightly so no empty corners show.</p>
+      <section class="card">
+        <h2><i data-icon="rotr"></i>Rotate and flip</h2>
+        <div class="group">
+          <button id="rotL"><i data-icon="rotl"></i>Rotate left</button>
+          <button id="rotR"><i data-icon="rotr"></i>Rotate right</button>
+          <button id="flipH"><i data-icon="fliph"></i>Flip horizontal</button>
+          <button id="flipV"><i data-icon="flipv"></i>Flip vertical</button>
+        </div>
+        <div class="row">
+          <label for="straighten"><span class="lbl"><i data-icon="ruler"></i>Straighten</span><output id="straightenOut">0°</output></label>
+          <input type="range" id="straighten" min="-15" max="15" step="0.1" value="0" title="Double-click to reset">
+        </div>
+      </section>
+      <section class="card">
+        <h2><i data-icon="crop"></i>Crop</h2>
+        <div class="group three" id="aspects">
+          <button data-aspect="0" class="active"><i data-icon="arOrig"></i>Original</button>
+          <button data-aspect="1"><i data-icon="ar11"></i>1:1</button>
+          <button data-aspect="1.3333"><i data-icon="ar43"></i>4:3</button>
+          <button data-aspect="1.5"><i data-icon="ar32"></i>3:2</button>
+          <button data-aspect="1.7778"><i data-icon="ar169"></i>16:9</button>
+          <button data-aspect="0.8"><i data-icon="ar45"></i>4:5</button>
+        </div>
+        <p class="hint">Crops are centered. Straighten zooms in slightly so no empty corners show.</p>
+      </section>
     </div>
 
     <div class="panel" id="tab-looks">
-      <div id="looks"></div>
+      <section class="card">
+        <h2><i data-icon="palette"></i>Filters</h2>
+        <div id="looks"></div>
+      </section>
     </div>
 
     <div class="panel" id="tab-bg">
-      <h2>Blur the background</h2>
-      <div class="group">
-        <button id="bgAuto" class="primary">Auto-detect subject</button>
-        <button id="bgCircle">Circle focus</button>
-        <button id="bgBand">Band focus</button>
-        <button id="bgClear">Clear</button>
-      </div>
-      <div class="row">
-        <label for="segModel">Subject type (for auto-detect)</label>
-        <select id="segModel">
-          <option value="person">Person / portrait</option>
-          <option value="objects">Objects, pets, people</option>
-        </select>
-      </div>
-      <p class="hint" id="bgStatus">Auto-detect downloads a small AI model the first time, so it needs internet. Circle and Band focus work offline.</p>
+      <section class="card">
+        <h2><i data-icon="logo"></i>Blur the background</h2>
+        <div class="group">
+          <button id="bgAuto" class="primary wide"><i data-icon="sparkles"></i>Auto-detect subject</button>
+          <button id="bgCircle"><i data-icon="circleFocus"></i>Circle focus</button>
+          <button id="bgBand"><i data-icon="bandFocus"></i>Band focus</button>
+        </div>
+        <div class="row">
+          <label for="segModel"><span class="lbl"><i data-icon="user"></i>Subject type (auto-detect)</span></label>
+          <select id="segModel">
+            <option value="person">Person / portrait</option>
+            <option value="objects">Objects, pets, people</option>
+          </select>
+        </div>
+        <p class="hint" id="bgStatus">Auto-detect downloads a small AI model the first time, so it needs internet. Circle and Band focus work offline.</p>
+      </section>
 
-      <div id="bgSliders"></div>
+      <section class="card">
+        <h2><i data-icon="adjust"></i>Blur settings</h2>
+        <div id="bgSliders"></div>
+        <button id="bgClear" class="full"><i data-icon="eraser"></i>Clear background blur</button>
+      </section>
 
-      <h2>Fine-tune with the brush</h2>
-      <div class="group three">
-        <button id="toolSharp">Keep sharp</button>
-        <button id="toolBlur">Blur more</button>
-        <button id="toolMove">Move focus</button>
-      </div>
-      <div class="row">
-        <label for="brushSize">Brush size <output id="brushOut">40</output></label>
-        <input type="range" id="brushSize" min="8" max="160" step="1" value="40">
-      </div>
-      <div class="group">
-        <button id="showMask">Show blur area</button>
-        <button id="invertMask">Swap sharp / blur</button>
-      </div>
-      <p class="hint">Pick a brush, then paint on the photo. "Show blur area" tints the blurred part red. If the wrong area is blurred after auto-detect, press "Swap sharp / blur".</p>
+      <section class="card">
+        <h2><i data-icon="brush"></i>Fine-tune with the brush</h2>
+        <div class="group three">
+          <button id="toolSharp"><i data-icon="brush"></i>Keep sharp</button>
+          <button id="toolBlur"><i data-icon="blurMore"></i>Blur more</button>
+          <button id="toolMove"><i data-icon="move"></i>Move focus</button>
+        </div>
+        <div class="row">
+          <label for="brushSize"><span class="lbl"><i data-icon="brushSize"></i>Brush size</span><output id="brushOut">40</output></label>
+          <input type="range" id="brushSize" min="8" max="160" step="1" value="40">
+        </div>
+        <div class="group">
+          <button id="showMask"><i data-icon="eye"></i>Show blur area</button>
+          <button id="invertMask"><i data-icon="swap"></i>Swap sharp / blur</button>
+        </div>
+        <p class="hint">Pick a brush, then paint on the photo. "Show blur area" tints the blurred part red. If the wrong area is blurred after auto-detect, press "Swap sharp / blur".</p>
+      </section>
     </div>
 
     <div class="panel" id="tab-export">
-      <div class="row">
-        <label for="format">Format</label>
-        <select id="format">
-          <option value="image/jpeg">JPEG</option>
-          <option value="image/png">PNG</option>
-          <option value="image/webp">WebP</option>
-          <option value="image/avif">AVIF</option>
-          <option value="image/gif">GIF</option>
-          <option value="image/bmp">BMP</option>
-          <option value="image/x-icon">ICO (icon)</option>
-          <option value="application/pdf">PDF</option>
-        </select>
-      </div>
-      <p class="hint" id="formatNote"></p>
-      <div class="row" id="qualityRow">
-        <label for="quality">Quality <output id="qualityOut">92</output></label>
-        <input type="range" id="quality" min="10" max="100" step="1" value="92">
-      </div>
-      <div class="row" id="colorsRow" style="display:none">
-        <label for="gifColors">Colours</label>
-        <select id="gifColors">
-          <option value="256">256</option>
-          <option value="128">128</option>
-          <option value="64">64</option>
-          <option value="32">32</option>
-          <option value="16">16</option>
-        </select>
-      </div>
-      <div class="row">
-        <label for="maxSide">Longest side</label>
-        <select id="maxSide">
-          <option value="0">Original size</option>
-          <option value="3840">3840 px</option>
-          <option value="2560">2560 px</option>
-          <option value="1920">1920 px</option>
-          <option value="1280">1280 px</option>
-          <option value="1080">1080 px</option>
-          <option value="720">720 px</option>
-          <option value="480">480 px</option>
-        </select>
-      </div>
-
-      <h2>Compress to a target size</h2>
-      <div class="row check">
-        <label class="inline"><input type="checkbox" id="compressOn"> Compress to a target file size (any format)</label>
-      </div>
-      <div class="group three" id="kbPresets">
-        <button data-kb="20">20 KB</button>
-        <button data-kb="50">50 KB</button>
-        <button data-kb="100">100 KB</button>
-        <button data-kb="200">200 KB</button>
-        <button data-kb="500">500 KB</button>
-        <button data-kb="1024">1 MB</button>
-      </div>
-      <div id="compressBox" hidden>
+      <section class="card">
+        <h2><i data-icon="file"></i>File</h2>
         <div class="row">
-          <label for="targetKB">Target size (KB, or smaller)</label>
-          <input type="number" id="targetKB" min="2" max="5000" step="1" value="20">
+          <label for="format"><span class="lbl"><i data-icon="file"></i>Format</span></label>
+          <select id="format">
+            <option value="image/jpeg">JPEG</option>
+            <option value="image/png">PNG</option>
+            <option value="image/webp">WebP</option>
+            <option value="image/avif">AVIF</option>
+            <option value="image/gif">GIF</option>
+            <option value="image/bmp">BMP</option>
+            <option value="image/x-icon">ICO (icon)</option>
+            <option value="application/pdf">PDF</option>
+          </select>
+          <p class="hint" id="formatNote"></p>
         </div>
-        <div class="row">
-          <label for="compressPref">Priority</label>
-          <select id="compressPref">
-            <option value="quality">Keep quality (shrinks dimensions)</option>
-            <option value="size">Keep dimensions (lower quality)</option>
+        <div class="row" id="qualityRow">
+          <label for="quality"><span class="lbl"><i data-icon="gauge"></i>Quality</span><output id="qualityOut">92</output></label>
+          <input type="range" id="quality" min="10" max="100" step="1" value="92">
+        </div>
+        <div class="row" id="colorsRow" style="display:none">
+          <label for="gifColors"><span class="lbl"><i data-icon="palette"></i>Colours</span></label>
+          <select id="gifColors">
+            <option value="256">256</option>
+            <option value="128">128</option>
+            <option value="64">64</option>
+            <option value="32">32</option>
+            <option value="16">16</option>
           </select>
         </div>
-        <p class="hint" id="compressHint"></p>
-      </div>
+        <div class="row">
+          <label for="maxSide"><span class="lbl"><i data-icon="maximize2"></i>Longest side</span></label>
+          <select id="maxSide">
+            <option value="0">Original size</option>
+            <option value="3840">3840 px</option>
+            <option value="2560">2560 px</option>
+            <option value="1920">1920 px</option>
+            <option value="1280">1280 px</option>
+            <option value="1080">1080 px</option>
+            <option value="720">720 px</option>
+            <option value="480">480 px</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2><i data-icon="archive"></i>Compress to a target size</h2>
+        <label class="switch">
+          <input type="checkbox" id="compressOn">
+          <span class="track"></span>
+          <span class="txt">Compress to a target file size (any format)</span>
+        </label>
+        <div class="group three chips" id="kbPresets">
+          <button data-kb="20">20 KB</button>
+          <button data-kb="50">50 KB</button>
+          <button data-kb="100">100 KB</button>
+          <button data-kb="200">200 KB</button>
+          <button data-kb="500">500 KB</button>
+          <button data-kb="1024">1 MB</button>
+        </div>
+        <div id="compressBox" hidden>
+          <div class="row">
+            <label for="targetKB"><span class="lbl"><i data-icon="target"></i>Target size (KB, or smaller)</span></label>
+            <input type="number" id="targetKB" min="2" max="5000" step="1" value="20">
+          </div>
+          <div class="row">
+            <label for="compressPref"><span class="lbl"><i data-icon="flag"></i>Priority</span></label>
+            <select id="compressPref">
+              <option value="quality">Keep quality (shrinks dimensions)</option>
+              <option value="size">Keep dimensions (lower quality)</option>
+            </select>
+          </div>
+          <p class="hint" id="compressHint"></p>
+        </div>
+      </section>
 
       <p class="hint" id="sizeHint">Exports at the original resolution.</p>
       <p class="hint status" id="exportStatus" aria-live="polite"></p>
     </div>
 
     <div class="foot">
-      <button id="downloadBtn" class="primary" disabled>Download</button>
+      <button id="downloadBtn" class="primary big" disabled><i data-icon="download"></i>Download</button>
     </div>
   </aside>
 </main>
