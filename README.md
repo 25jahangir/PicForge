@@ -1,6 +1,5 @@
 PicForge Photo Editor
-MD JAHANGIR ALAM । ID: 315222012
-MYNUL ISLAM SHANTO ।  ID 315231068
+
 Features and Usage Guide
 A full description of every feature, a step-by-step workflow for each one, and worked examples. Your photo is processed entirely in your browser and never leaves your device.
 1. What you can do with this software
